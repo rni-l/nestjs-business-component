@@ -75,11 +75,11 @@ setConstantByKey('setTransformByKey', (data) => ({ value: data }))
 app.module.ts
 
 ```typescript
-import { initLogoModule } from 'nestjs-business-component'
+import { initLogModule } from 'nestjs-business-component'
 
 @Module({
   imports: [
-    initLogoModule()
+    initLogModule()
   ]
 })
 export class AppModule{}
