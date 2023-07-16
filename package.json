@@ -4,7 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env MODE=test jest --config ./test/jest.json --runInBand --coverage",
+    "test:watch": "cross-env MODE=test jest --config ./test/jest.json --watch --runInBand",
     "build": "tsc --build",
     "watch": "tsc --watch"
   },

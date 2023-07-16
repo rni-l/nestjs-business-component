@@ -22,15 +22,14 @@ export class LoggerMiddleware implements NestMiddleware {
     const { ip, method, originalUrl, query, body } = req;
     const userAgent = req.get('user-agent') || '';
     const now = Date.now();
-
     this.logger.info(
-      `${method} ${originalUrl} ${JSON.stringify(query)} body ${
-        // this.isDev ? JSON.stringify(body) : '不记录'
-        JSON.stringify(body)
-      } [${Date.now() - now}ms] - ${userAgent} ${ip}`,
+      `${method} ${originalUrl} ${JSON.stringify(query)} body ${JSON.stringify(
+        body,
+      )} [${Date.now() - now}ms] - ${userAgent} ${ip}`,
     );
 
     res.on('close', () => {
+      console.log('close');
       const { statusCode } = res;
       const contentLength = res.get('content-length');
 
