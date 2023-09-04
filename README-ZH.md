@@ -22,7 +22,9 @@
 ## 使用
 
 ```shell
-npm i nestjs-business-component
+npm i nestjs-business-component -S
+# other dependencies
+npm i class-transformer class-validator @nestjs/swagger -S
 
 ```
 
@@ -339,3 +341,60 @@ export class AppModule {}
 
 ```
 
+### 完整例子
+```typescript
+// main.ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { ValidationPipe } from '@nestjs/common';
+import { setupSwagger } from 'nestjs-business-component';
+
+async function bootstrap() {
+  try {
+    const app = await NestFactory.create(AppModule);
+    app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+    setupSwagger(app);
+    // insert
+    app.useGlobalPipes(new ValidationPipe());
+    await app.listen(3300);
+  } catch (error) {}
+}
+bootstrap();
+
+```
+
+```typescript
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import {
+  TransformInterceptor,
+  initLogModule,
+  getEnvListByMode,
+  HttpExceptionFilter,
+} from 'nestjs-business-component';
+import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: getEnvListByMode(), // get env files
+      isGlobal: true,
+    }),
+    initLogModule(),
+  ],
+  controllers: [AppController],
+  providers: [
+    AppService,
+    { provide: APP_INTERCEPTOR, useClass: TransformInterceptor },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
+})
+export class AppModule {}
+```
