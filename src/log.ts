@@ -20,25 +20,53 @@ const formatLog = winston.format.combine(
 
 const getLog = (logConfig: Record<string, any>, dirPath: string) => {
   return new winston.transports.DailyRotateFile({
-    ...logConfig,
     format: formatLog,
     dirname: dirPath,
     datePattern: 'YYYY-MM-DD',
     zippedArchive: true,
     maxSize: '10m',
     maxFiles: '10d',
+    json: true,
+    ...logConfig,
   });
 };
 
+export interface IInitLogOpts {
+  customLevel?: { name: string; level: number }[];
+}
+
 export const initLogModule = (
   logPath = path.resolve(__dirname, '../../../logs'),
-) =>
-  WinstonModule.forRootAsync({
+  opts: IInitLogOpts = {},
+) => {
+  const customLevel = opts.customLevel || [];
+  console.log(
+    customLevel.reduce((acc, v) => {
+      acc[v.name] = v.level;
+      return acc;
+    }, {}),
+  );
+  return WinstonModule.forRootAsync({
     imports: [],
     useFactory: () => {
       // options
       return {
         level: 'info',
+        levels: Object.assign(
+          {
+            error: 0,
+            warn: 1,
+            info: 2,
+            http: 3,
+            verbose: 4,
+            debug: 5,
+            silly: 6,
+          },
+          customLevel.reduce((acc, v) => {
+            acc[v.name] = v.level;
+            return acc;
+          }, {}),
+        ),
         format: winston.format.combine(timestamp, formatLog),
         transports: [
           new winston.transports.Console({
@@ -65,8 +93,18 @@ export const initLogModule = (
             },
             logPath,
           ),
-        ],
+          ...customLevel.map((v) =>
+            getLog(
+              {
+                filename: path.join(logPath, `${v.name}-%DATE%.log`),
+                level: v.name,
+              },
+              logPath,
+            ),
+          ),
+        ].filter((v) => v),
       };
     },
     inject: [],
   });
+};

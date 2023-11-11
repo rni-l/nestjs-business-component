@@ -25,7 +25,7 @@ Scaffold generation feature.
 # install
 npm i nestjs-business-component -S
 # other dependencies
-npm i class-transformer class-validator @nestjs/swagger -S
+npm i class-transformer class-validator @nestjs/swagger nest-winston @nestjs/config -S
 ```
 
 ### Modifying Basic Configuration
